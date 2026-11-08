@@ -1,0 +1,1097 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#10b981">
+<title>IndiePulse — Voice-first commerce for Bharat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<style>
+/* =====================================================================================
+   DESIGN TOKENS  — role themes: Farmer = Emerald · Driver = Blue · Wholesaler = Deep indigo-blue · Kirana = Amber
+   ===================================================================================== */
+:root{
+  --ink:#0b1220; --ink2:#334155; --muted:#64748b; --line:rgba(15,23,42,.09);
+  --glass:rgba(255,255,255,.66); --glass-strong:rgba(255,255,255,.86); --glass-border:rgba(255,255,255,.75);
+  --radius:20px; --radius-sm:12px;
+  --shadow:0 18px 40px -22px rgba(15,23,42,.28),0 2px 6px rgba(15,23,42,.05);
+  --shadow-lg:0 30px 70px -28px rgba(15,23,42,.38);
+  --good:#059669; --bad:#dc2626; --warn:#d97706;
+  --a1:#10b981; --a2:#047857; --a-soft:#d1fae5; --a-ink:#065f46; --blob1:#6ee7b7; --blob2:#a7f3d0; --blob3:#bae6fd;
+  --font:'Inter',system-ui,-apple-system,'Segoe UI',Roboto,'Noto Sans','Noto Sans Devanagari','Noto Sans Kannada','Noto Sans Tamil','Noto Sans Telugu',sans-serif;
+}
+body[data-theme=farmer]{--a1:#10b981;--a2:#047857;--a-soft:#d1fae5;--a-ink:#065f46;--blob1:#6ee7b7;--blob2:#a7f3d0;--blob3:#bef264}
+body[data-theme=driver]{--a1:#3b82f6;--a2:#1d4ed8;--a-soft:#dbeafe;--a-ink:#1e3a8a;--blob1:#93c5fd;--blob2:#67e8f9;--blob3:#c4b5fd}
+body[data-theme=wholesaler]{--a1:#3b5bdb;--a2:#1e2a78;--a-soft:#e0e7ff;--a-ink:#1e2a78;--blob1:#a5b4fc;--blob2:#93c5fd;--blob3:#d8b4fe}
+body[data-theme=kirana]{--a1:#f59e0b;--a2:#ea580c;--a-soft:#fef3c7;--a-ink:#9a3412;--blob1:#fcd34d;--blob2:#fdba74;--blob3:#fda4af}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;font:15px/1.5 var(--font);color:var(--ink);background:#f6f8fb;min-height:100vh;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;transition:background .6s;
+  background:radial-gradient(40% 35% at 15% 10%,var(--blob1) 0%,transparent 70%),radial-gradient(35% 35% at 90% 5%,var(--blob3) 0%,transparent 70%),
+             radial-gradient(45% 40% at 70% 95%,var(--blob2) 0%,transparent 70%);opacity:.45;filter:blur(30px)}
+h1,h2,h3,h4{margin:0;letter-spacing:-.02em}
+button{font-family:inherit}
+.hidden{display:none!important}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* =====================================================================================
+   LAYOUT
+   ===================================================================================== */
+.app{display:grid;grid-template-columns:268px 1fr;min-height:100vh}
+.side{position:sticky;top:0;height:100vh;padding:20px 14px;display:flex;flex-direction:column;gap:18px;border-right:1px solid var(--line);background:var(--glass);backdrop-filter:blur(22px) saturate(1.4);-webkit-backdrop-filter:blur(22px) saturate(1.4)}
+.brand{display:flex;gap:11px;align-items:center;padding:4px 8px}
+.logo{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 10px 22px -8px var(--a2);transition:background .4s}
+.brand b{font-size:18px;letter-spacing:-.03em;display:block;line-height:1.1}
+.brand small{color:var(--muted);font-size:11.5px}
+.portals{display:flex;flex-direction:column;gap:6px}
+.pbtn{display:flex;align-items:center;gap:12px;border:0;background:transparent;padding:11px 12px;border-radius:14px;cursor:pointer;text-align:left;color:var(--ink2);font-size:14.5px;font-weight:600;transition:.2s;position:relative}
+.pbtn:hover{background:rgba(255,255,255,.7)}
+.pbtn .ic{width:34px;height:34px;border-radius:11px;display:grid;place-items:center;background:var(--tint);color:var(--tc);flex:none}
+.pbtn small{display:block;font-weight:500;color:var(--muted);font-size:11.5px}
+.pbtn.on{background:#fff;box-shadow:var(--shadow);color:var(--ink)}
+.pbtn.on::after{content:"";position:absolute;left:-14px;top:12px;bottom:12px;width:4px;border-radius:0 4px 4px 0;background:var(--tc)}
+.pbtn[data-portal=farmer]{--tint:#d1fae5;--tc:#059669}.pbtn[data-portal=driver]{--tint:#dbeafe;--tc:#2563eb}
+.pbtn[data-portal=wholesaler]{--tint:#e0e7ff;--tc:#2d3fa8}.pbtn[data-portal=kirana]{--tint:#fef3c7;--tc:#d97706}
+.side-foot{margin-top:auto;font-size:12px;color:var(--muted);padding:0 8px}
+.content{min-width:0;padding:0 0 40px}
+.topbar{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;padding:12px 28px;background:rgba(246,248,251,.72);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.topbar .mbrand{display:none;align-items:center;gap:8px;font-weight:800;letter-spacing:-.03em}
+.topbar .grow{flex:1}
+.tb-field{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.sel{appearance:none;border:1px solid var(--line);background:rgba(255,255,255,.9) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='3'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E") no-repeat right 10px center;padding:8px 30px 8px 12px;border-radius:12px;font:600 13.5px var(--font);color:var(--ink);cursor:pointer}
+.chipu{display:inline-flex;align-items:center;gap:8px;padding:6px 6px 6px 12px;background:#fff;border:1px solid var(--line);border-radius:999px;font-size:13px;font-weight:600;box-shadow:0 2px 8px rgba(15,23,42,.04)}
+.chipu button{border:0;background:var(--a-soft);color:var(--a-ink);border-radius:999px;padding:5px 10px;font-weight:700;font-size:12px;cursor:pointer}
+.engine{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:6px 10px;border-radius:999px;background:#fff;border:1px solid var(--line)}
+.engine i{width:8px;height:8px;border-radius:50%;background:#94a3b8}
+.engine.live i{background:#22c55e;box-shadow:0 0 0 4px rgba(34,197,94,.18)}
+main{max-width:1240px;margin:0 auto;padding:22px 28px}
+.pane{animation:rise .45s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.stack{display:flex;flex-direction:column;gap:18px}
+.tabbar{display:none}
+
+/* =====================================================================================
+   COMPONENTS
+   ===================================================================================== */
+.hero{position:relative;overflow:hidden;border-radius:26px;padding:28px 30px;color:#fff;margin-bottom:18px;background:linear-gradient(120deg,var(--a1),var(--a2));box-shadow:var(--shadow-lg);transition:background .5s}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;background:rgba(255,255,255,.14);filter:blur(2px)}
+.hero::before{width:320px;height:320px;right:-90px;top:-140px}.hero::after{width:200px;height:200px;right:140px;bottom:-130px;background:rgba(255,255,255,.1)}
+.hero .eyebrow{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;opacity:.85}
+.hero h1{font-size:clamp(24px,3.2vw,36px);font-weight:800;margin:6px 0 8px;max-width:640px;line-height:1.12}
+.hero p{margin:0;max-width:560px;opacity:.92}
+.hero .pills{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;position:relative;z-index:1}
+.hpill{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-radius:16px;padding:10px 14px;min-width:150px}
+.hpill b{display:block;font-size:21px;letter-spacing:-.02em}.hpill span{font-size:12px;opacity:.9}
+.card{background:var(--glass);border:1px solid var(--glass-border);border-radius:var(--radius);padding:20px;box-shadow:var(--shadow);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);min-width:0}
+.card-h{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.card-h .ic{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--a-soft);color:var(--a-ink);flex:none}
+.card-h h3{font-size:17px;font-weight:700}.card-h p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;cursor:pointer;color:#fff;font:700 14px var(--font);padding:11px 18px;border-radius:13px;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 10px 22px -12px var(--a2);transition:transform .15s,box-shadow .2s,filter .2s;text-decoration:none}
+.btn:hover{transform:translateY(-1px);filter:brightness(1.05)}.btn:active{transform:none}
+.btn:disabled{opacity:.55;cursor:not-allowed;transform:none}
+.btn.ghost{background:#fff;color:var(--a-ink);border:1px solid var(--line);box-shadow:none}
+.btn.danger{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+.btn.sm{padding:8px 12px;font-size:13px;border-radius:11px}
+.btn.block{width:100%}
+.field{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:600;color:var(--muted);min-width:0}
+.input,.field input,.field select,textarea.input{font:500 14.5px var(--font);color:var(--ink);padding:11px 13px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.92);outline:none;transition:.15s;max-width:100%;width:100%}
+.input:focus,.field input:focus,.field select:focus,textarea.input:focus{border-color:var(--a1);box-shadow:0 0 0 4px color-mix(in srgb,var(--a1) 18%,transparent)}
+textarea.input{min-height:84px;resize:vertical}
+.fields{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}.fields>.field{flex:1 1 140px}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.muted{color:var(--muted);font-size:13px}.err{color:var(--bad);font-size:13px}.ok{color:var(--good)}
+.seg{display:inline-flex;background:rgba(15,23,42,.06);padding:4px;border-radius:13px;gap:2px;flex-wrap:wrap}
+.seg button{border:0;background:transparent;padding:8px 13px;border-radius:10px;font:600 13px var(--font);color:var(--ink2);cursor:pointer}
+.seg button.on{background:#fff;color:var(--a-ink);box-shadow:0 2px 8px rgba(15,23,42,.1)}
+.chips{display:flex;gap:7px;flex-wrap:wrap}
+.chip{border:1px solid color-mix(in srgb,var(--a1) 35%,transparent);color:var(--a-ink);background:var(--a-soft);border-radius:999px;padding:6px 12px;cursor:pointer;font:600 13px var(--font);transition:.15s}
+.chip:hover{transform:translateY(-1px)}
+.chip.plain{background:#fff;color:var(--ink2);border-color:var(--line)}
+.chip.bad{background:#fee2e2;color:#991b1b;border-color:#fecaca}.chip.warn{background:#ffedd5;color:#9a3412;border-color:#fed7aa}
+.badge{display:inline-block;border-radius:999px;padding:3px 9px;font-size:11.5px;font-weight:700;color:#fff;background:#64748b;text-transform:capitalize}
+.b-expired,.b-critical,.b-rejected{background:#dc2626}.b-high,.b-pending{background:#ea580c}.b-medium{background:#d97706}.b-low,.b-accepted{background:#059669}
+.mic{width:64px;height:64px;flex:none;border-radius:50%;border:0;cursor:pointer;color:#fff;display:grid;place-items:center;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 14px 28px -10px var(--a2);position:relative;transition:transform .15s}
+.mic:hover{transform:scale(1.05)}
+.mic.rec{background:linear-gradient(135deg,#ef4444,#b91c1c)}
+.mic.rec::after{content:"";position:absolute;inset:-6px;border-radius:50%;border:2px solid #ef4444;animation:ring 1.2s infinite}
+@keyframes ring{from{opacity:.9;transform:scale(.92)}to{opacity:0;transform:scale(1.35)}}
+.table-wrap{overflow:auto;border-radius:14px;border:1px solid var(--line);background:rgba(255,255,255,.7)}
+table{border-collapse:collapse;width:100%}
+th,td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;font-size:13.5px;vertical-align:middle}
+th{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;background:rgba(248,250,252,.8);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+td input{padding:8px 9px;border:1px solid var(--line);border-radius:9px;font:500 14px var(--font);width:100%;min-width:60px;background:#fff}
+.kpi{background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:18px;padding:16px;display:flex;flex-direction:column;gap:6px;box-shadow:0 6px 18px -14px rgba(15,23,42,.3)}
+.kpi .lbl{font-size:12.5px;color:var(--muted);font-weight:600}
+.kpi .big{font-size:26px;font-weight:800;letter-spacing:-.03em}
+.delta{display:inline-flex;align-self:flex-start;gap:4px;font-size:12px;font-weight:700;color:#065f46;background:#d1fae5;padding:3px 9px;border-radius:999px}
+.ba{display:grid;gap:4px;margin-top:4px}
+.ba div{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--muted)}
+.ba i{display:block;height:6px;border-radius:99px;background:#cbd5e1}.ba .af i{background:linear-gradient(90deg,var(--a1),var(--a2))}
+.ba em{font-style:normal;width:36px}
+#exTbl td,#exTbl th{white-space:nowrap}#exTbl td:first-child{white-space:normal;min-width:190px}
+.empty{text-align:center;color:var(--muted);padding:22px;font-size:13.5px}
+.divider{height:1px;background:var(--line);margin:14px 0}
+.vcard{display:flex;flex-direction:column;gap:8px;background:rgba(255,255,255,.92);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 6px 18px -14px rgba(15,23,42,.3)}
+.vcard .plate{display:inline-block;font:700 13px ui-monospace,Menlo,monospace;background:#fde68a;border:1.5px solid #78350f;color:#451a03;border-radius:7px;padding:2px 8px;letter-spacing:.08em}
+.stat-row{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--ink2)}.stat-row b{color:var(--ink)}
+.canvas-box{position:relative;height:320px}
+.example{font-size:12.5px;color:var(--muted)}.example button{border:0;background:none;color:var(--a-ink);font:700 12.5px var(--font);cursor:pointer;text-decoration:underline;padding:0}
+
+/* =====================================================================================
+   MODALS, TOASTS, AUTH
+   ===================================================================================== */
+.rolegrid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:18px;text-align:left}
+.rolecard{--rc:#059669;display:flex;flex-direction:column;gap:6px;border:1.5px solid var(--line);background:#fff;border-radius:18px;padding:16px;cursor:pointer;font-family:inherit;color:var(--ink);transition:.18s;box-shadow:0 6px 18px -14px rgba(15,23,42,.35)}
+.rolecard:hover,.rolecard:focus-visible{transform:translateY(-3px);border-color:var(--rc);box-shadow:0 18px 30px -18px var(--rc);outline:none}
+.rolecard .ic{width:44px;height:44px;border-radius:14px;display:grid;place-items:center;color:#fff;background:var(--rc)}
+.rolecard b{font-size:15px;letter-spacing:-.01em;margin-top:4px}.rolecard small{color:var(--muted);font-size:12px;line-height:1.35}
+.rolechip{display:inline-flex;align-items:center;gap:8px;margin-top:14px;padding:6px 6px 6px 12px;border-radius:999px;background:var(--a-soft);color:var(--a-ink);font-weight:700;font-size:13px}
+.rolechip button{border:0;background:#fff;border-radius:999px;padding:4px 10px;font:700 12px var(--font);color:var(--a-ink);cursor:pointer}
+.warnbar{display:flex;gap:12px;align-items:flex-start;background:#fff7ed;border-bottom:1px solid #fed7aa;color:#9a3412;padding:10px 28px;font-size:13px}
+.warnbar code{background:#ffedd5;border-radius:6px;padding:1px 6px;font-size:12px}.warnbar button{margin-left:auto;border:0;background:none;color:#9a3412;font-size:18px;cursor:pointer;line-height:1}
+.pbtn.locked{display:none}
+body.single .tabbar{display:none}
+.overlay{position:fixed;inset:0;display:none;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow:auto;background:rgba(11,18,32,.5);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);z-index:60}
+.overlay.on{display:flex}
+.sheet{background:var(--glass-strong);border:1px solid var(--glass-border);border-radius:24px;padding:22px;max-width:920px;width:100%;box-shadow:var(--shadow-lg);animation:rise .3s}
+#authModal{z-index:100;align-items:center;background:linear-gradient(135deg,rgba(6,78,59,.78),rgba(30,58,138,.72) 55%,rgba(154,52,18,.7))}
+#authModal .sheet{max-width:430px;text-align:center;padding:30px 28px}
+.authlogo{width:60px;height:60px;border-radius:20px;margin:0 auto 14px;display:grid;place-items:center;color:#fff;background:linear-gradient(135deg,#10b981,#1d4ed8);box-shadow:0 16px 34px -12px #1d4ed8}
+.phone{display:flex;gap:8px;align-items:center;margin:16px 0 6px}
+.phone span{padding:12px 14px;border-radius:12px;background:#fff;border:1px solid var(--line);font-weight:700}
+.otp{letter-spacing:.7em;text-align:center;font-size:24px!important;font-weight:800!important;padding-left:.7em!important}
+.warnbox{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:12px;padding:9px 12px;font-size:13px;margin:8px 0}
+.infobox{background:#ecfdf5;border:1px solid #a7f3d0;color:#065f46;border-radius:12px;padding:9px 12px;font-size:13px;margin:10px 0}
+#toasts{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;display:flex;flex-direction:column;gap:8px;z-index:200;align-items:center}
+.toast{background:#0b1220;color:#fff;padding:10px 16px;border-radius:14px;font-size:13.5px;font-weight:600;box-shadow:var(--shadow-lg);animation:rise .25s;max-width:min(92vw,460px)}
+.toast.bad{background:#991b1b}.toast.good{background:#065f46}
+.receipt{font-family:ui-monospace,Menlo,monospace;font-size:13px}
+.receipt h2{font-family:var(--font)}
+
+/* floating assistant + driver card */
+#fab{position:fixed;right:20px;bottom:20px;width:60px;height:60px;border-radius:50%;border:0;color:#fff;cursor:pointer;z-index:40;display:grid;place-items:center;background:linear-gradient(135deg,var(--a1),var(--a2));box-shadow:0 18px 36px -10px var(--a2);transition:transform .2s}
+#fab:hover{transform:scale(1.07) rotate(-4deg)}
+#assistant{position:fixed;right:20px;bottom:92px;width:min(410px,calc(100vw - 24px));max-height:78vh;overflow:auto;background:var(--glass-strong);border:1px solid var(--glass-border);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-radius:24px;padding:16px;z-index:40;display:none;box-shadow:var(--shadow-lg)}
+#assistant.on{display:block;animation:rise .25s}
+#assistant .out{background:var(--a-soft);color:var(--a-ink);border-radius:14px;padding:12px;min-height:50px;margin:10px 0;font-size:18px;font-weight:600}
+#meter{height:8px;background:rgba(15,23,42,.08);border-radius:99px;overflow:hidden}#meter i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--a1),var(--a2));transition:width .08s}
+#card{position:fixed;inset:0;background:#05070d;color:#fde047;display:none;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:28px;z-index:300;cursor:pointer}
+#card.on{display:flex}
+#card .big{font-size:clamp(44px,11vw,128px);font-weight:800;line-height:1.12;letter-spacing:-.02em}
+#card .small{font-size:clamp(16px,3.5vw,28px);color:#e2e8f0;margin-top:26px}
+
+/* =====================================================================================
+   RESPONSIVE
+   ===================================================================================== */
+@media(max-width:1100px){.grid2{grid-template-columns:1fr}}
+@media(max-width:900px){
+  .app{grid-template-columns:1fr}.side{display:none}
+  .topbar{padding:10px 14px;gap:8px}.topbar .mbrand{display:flex}.tb-field.hide-sm{display:none}.tb-field .lbl{display:none}
+  .topbar .sel{padding:7px 28px 7px 10px;font-size:13px}.chipu{padding:4px 4px 4px 10px;font-size:12.5px}.engine{padding:5px 9px;font-size:11.5px}
+  main{padding:14px 14px 96px}
+  .hero{padding:22px 20px;border-radius:22px}
+  .tabbar{display:grid;grid-template-columns:repeat(4,1fr);position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:50;background:var(--glass-strong);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid var(--glass-border);border-radius:22px;padding:6px;box-shadow:var(--shadow-lg)}
+  .tabbar .pbtn{flex-direction:column;gap:4px;padding:8px 4px;font-size:11px;text-align:center;align-items:center}
+  .tabbar .pbtn small{display:none}.tabbar .pbtn.on::after{display:none}
+  .tabbar .pbtn .ic{width:30px;height:30px}
+  #fab{bottom:96px;right:14px;width:54px;height:54px}#assistant{bottom:158px;right:10px}
+  body.single main{padding-bottom:40px}body.single #fab{bottom:20px}body.single #assistant{bottom:86px}
+  .warnbar{padding:10px 14px}.rolegrid{gap:10px}.rolecard{padding:13px}
+  .card{padding:16px}
+}
+@media print{body *{visibility:hidden}#rcpt,#rcpt *{visibility:visible}#rcpt{position:absolute;left:0;top:0;width:100%}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body data-theme="farmer">
+
+<!-- =============================== MOBILE OTP SIGN-IN =============================== -->
+<div class="overlay on" id="authModal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+  <div class="sheet">
+    <div class="authlogo"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h3l2-7 4 14 3-9 2 2h4"/></svg></div>
+    <h2 id="authTitle" style="font-size:24px;font-weight:800">Welcome to IndiePulse</h2>
+    <p class="muted" id="authSub" style="margin:6px 0 0">Choose how you use IndiePulse. Each role has its own login and workspace.</p>
+    <div id="authStep0"><div class="rolegrid" id="roleGrid"></div></div>
+    <div id="authStep1" class="hidden">
+      <div class="rolechip"><span id="rolePicked"></span><button type="button" id="changeRoleBtn">Change role</button></div>
+      <div class="phone"><span>🇮🇳 +91</span><input class="input" id="authPhone" type="tel" inputmode="numeric" autocomplete="tel-national" placeholder="98765 43210" maxlength="10" aria-label="Mobile number"></div>
+      <button class="btn block" id="sendOtpBtn" style="margin-top:10px">Get OTP →</button>
+    </div>
+    <div id="authStep2" class="hidden">
+      <div class="infobox" id="authHint">OTP sent.</div>
+      <input class="input otp" id="authOtp" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="4" placeholder="••••" aria-label="4-digit OTP">
+      <button class="btn block" id="verifyOtpBtn" style="margin-top:12px">Verify &amp; continue</button>
+      <div class="row" style="justify-content:center;margin-top:10px"><button class="btn ghost sm" id="resendBtn" type="button">Resend OTP</button><button class="btn ghost sm" id="changeNumBtn" type="button">Change number</button></div>
+    </div>
+    <p id="authErr" class="err" style="margin:12px 0 0;min-height:18px" role="alert"></p>
+    <p class="muted" style="font-size:11.5px;margin:6px 0 0">Demo build: no SMS is sent. Your session is stored on this device only.</p>
+  </div>
+</div>
+
+<div class="app">
+  <!-- ================================ SIDEBAR (desktop) ================================ -->
+  <aside class="side">
+    <div class="brand"><div class="logo" data-i="pulse"></div><div><b>IndiePulse</b><small>Voice-first commerce for Bharat</small></div></div>
+    <nav class="portals" id="portalNav" aria-label="Portals">
+      <button class="pbtn on" data-portal="farmer"><span class="ic" data-i="leaf"></span><span>Farmer<small>Invoices · trucks · savings</small></span></button>
+      <button class="pbtn" data-portal="driver"><span class="ic" data-i="truck"></span><span>Driver &amp; Transporter<small>Waybills · trips · earnings</small></span></button>
+      <button class="pbtn" data-portal="wholesaler"><span class="ic" data-i="building"></span><span>Wholesaler Desk<small>B2B · logistics · ROI</small></span></button>
+      <button class="pbtn" data-portal="kirana"><span class="ic" data-i="store"></span><span>Kirana &amp; Q-Commerce<small>Billing · expiry · Blinkit/Zepto</small></span></button>
+    </nav>
+    <div class="side-foot">Demo data is clearly labelled. Voice engine: <b id="engineSide">checking…</b></div>
+  </aside>
+
+  <div class="content">
+    <div class="warnbar hidden" id="secureBanner" role="alert"><span>🎙️ <b>Microphone and clipboard are blocked</b> because this page is open over plain <code>http://</code> on a network address. Browsers only allow them on <code>localhost</code> or <code>https://</code>. Open <code>http://localhost:5000</code> on this computer, or restart the server with <code>HTTPS=1</code> and open <code>https://<span id="secureHost"></span></code>.</span><button type="button" id="secureClose" aria-label="Dismiss">×</button></div>
+    <!-- ===================================== TOP BAR ===================================== -->
+    <header class="topbar">
+      <div class="mbrand"><span class="logo" style="width:32px;height:32px;border-radius:10px" data-i="pulse"></span>IndiePulse</div>
+      <div class="grow"></div>
+      <span class="engine" id="engineBadge" title="Speech-to-text engine"><i></i><span id="engineTxt">Voice</span></span>
+      <label class="tb-field hide-sm"><span class="lbl">Voice</span>
+        <select class="sel" id="engineSel" aria-label="Voice engine"><option value="auto">Auto</option><option value="gnani">Gnani Vachana</option><option value="browser">Browser</option></select></label>
+      <label class="tb-field"><span class="lbl">I speak</span>
+        <select class="sel" id="uiLang" aria-label="My language">
+          <option value="en">English</option><option value="hi">हिन्दी</option><option value="kn">ಕನ್ನಡ</option>
+          <option value="ta">தமிழ்</option><option value="te">తెలుగు</option><option value="mr">मराठी</option></select></label>
+      <span class="chipu hidden" id="userChip"><span id="userBadge"></span><button id="logoutBtn" type="button">Sign out</button></span>
+    </header>
+
+    <main>
+      <!-- ================================ 1 · FARMER ================================ -->
+      <section class="pane" id="pane-farmer">
+        <div class="hero">
+          <div class="eyebrow">Farmer portal</div>
+          <h1>Sell by voice. Keep more of every quintal.</h1>
+          <p>Dictate in your language, get an official receipt benchmarked to mandi rates, and book a truck in two taps.</p>
+          <div class="pills"><div class="hpill"><b id="heroFarmerSave">—</b><span>Middleman cost saved / month</span></div><div class="hpill"><b id="heroFarmerEarn">—</b><span>Monthly earnings after IndiePulse</span></div></div>
+        </div>
+        <div class="grid2">
+          <div id="bill-farmer"></div>
+          <div class="card" id="lg-farmer"></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="card-h"><span class="ic" data-i="trend"></span><div><h3>Farmer wealth &amp; middleman savings</h3><p>Before vs after onboarding · <span class="demo-note">demo data</span></p></div></div>
+          <div class="grid3" id="kpi-farmer"><div class="empty">Sign in to load analytics…</div></div>
+        </div>
+      </section>
+
+      <!-- ================================ 2 · DRIVER ================================ -->
+      <section class="pane hidden" id="pane-driver">
+        <div class="hero">
+          <div class="eyebrow">Driver &amp; transporter portal</div>
+          <h1>Full loads, fair fares, fewer empty miles.</h1>
+          <p>Log every trip by voice, share waybills on WhatsApp, and talk to any customer in their language.</p>
+          <div class="pills"><div class="hpill"><b id="heroDriverTrips">—</b><span>Trips logged this month</span></div><div class="hpill"><b id="heroDriverFare">—</b><span>Fares this month</span></div></div>
+        </div>
+        <div class="grid2">
+          <div id="bill-driver"></div>
+          <div class="stack">
+            <div class="card">
+              <div class="card-h"><span class="ic" data-i="route"></span><div><h3>Trip performance</h3><p>Live from the waybills you save</p></div></div>
+              <div class="grid3" id="driverLive"><div class="empty">Sign in to load trips…</div></div>
+              <div class="divider"></div>
+              <div id="driverRecent"></div>
+            </div>
+            <div class="card">
+              <div class="card-h"><span class="ic" data-i="globe"></span><div><h3>Last-mile translator</h3><p>Paste a customer's chat, tap a quick reply, or show a giant card.</p></div></div>
+              <button class="btn" type="button" data-open-assistant>Open delivery assistant</button>
+            </div>
+          </div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="card-h"><span class="ic" data-i="trend"></span><div><h3>Driver net earnings — before vs after</h3><p><span class="demo-note">Demo data</span> · replace with your own once trips accumulate</p></div></div>
+          <div class="grid3" id="kpi-driver"><div class="empty">Sign in to load analytics…</div></div>
+        </div>
+      </section>
+
+      <!-- ============================== 3 · WHOLESALER ============================== -->
+      <section class="pane hidden" id="pane-wholesaler">
+        <div class="hero">
+          <div class="eyebrow">Wholesaler &amp; FMCG distributor desk</div>
+          <h1>Bulk billing, backhaul logistics and live ROI.</h1>
+          <p>GST-ready B2B invoices by voice, matched vehicles from brand to wholesaler to kirana, and proof the platform pays for itself.</p>
+          <div class="pills"><div class="hpill"><b id="heroWsProfit">—</b><span>Monthly profit after IndiePulse</span></div><div class="hpill"><b id="heroWsCap">—</b><span>Capital unlocked from dead stock</span></div></div>
+        </div>
+        <div class="grid2">
+          <div id="bill-wholesaler"></div>
+          <div class="card" id="lg-wholesaler"></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="card-h"><span class="ic" data-i="trend"></span><div><h3>Wholesaler &amp; FMCG ROI</h3><p>Before vs after onboarding · <span class="demo-note">demo data</span></p></div></div>
+          <div id="kpi-wholesaler"><div class="empty">Sign in to load analytics…</div></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="row" style="justify-content:space-between;margin-bottom:10px"><div><h3 style="font-size:17px">Compare performance</h3><div class="muted">Choose which roles appear in both charts</div></div>
+            <div class="chips" id="cmpChips"></div></div>
+          <div class="grid2"><div><h4 style="font-size:14px;margin:0 0 8px;color:var(--muted)">Monthly net profit / earnings — before vs after</h4><div class="canvas-box"><canvas id="barChart"></canvas></div></div>
+          <div><h4 style="font-size:14px;margin:0 0 8px;color:var(--muted)">Idle capital &amp; spoilage (index, first month = 100)</h4><div class="canvas-box"><canvas id="lineChart"></canvas></div></div></div>
+          <p class="muted hidden" id="chartMsg"></p>
+        </div>
+      </section>
+
+      <!-- ============================ 4 · KIRANA + Q-COMMERCE ============================ -->
+      <section class="pane hidden" id="pane-kirana">
+        <div class="hero">
+          <div class="eyebrow">Kirana &amp; quick-commerce network</div>
+          <h1>Your shop, now a neighbourhood fulfilment hub.</h1>
+          <p>Bill by voice, never lose stock to expiry, and accept Blinkit and Zepto orders in your own language.</p>
+          <div class="pills"><div class="hpill"><b id="heroKiranaGrowth">—</b><span>Regional customer revenue growth</span></div><div class="hpill"><b id="heroKiranaRisk">—</b><span>Stock value at risk (30 days)</span></div></div>
+        </div>
+        <div class="grid2">
+          <div id="bill-kirana"></div>
+          <div class="card">
+          <div class="card-h"><span class="ic" data-i="bolt"></span><div><h3>Quick-commerce partner bridge</h3><p>Live kirana stock for Blinkit / Zepto dark stores (server-to-server via <code>X-API-Key</code> on <code>/api/qc/*</code>)</p></div></div>
+          <div class="fields"><label class="field" style="max-width:140px">Pincode<input id="qcPin" value="560034"></label>
+            <button class="btn ghost" id="qcInv" type="button">Load kirana inventory</button><button class="btn" id="qcSim1" type="button">Simulate Blinkit order</button>
+            <button class="btn" id="qcSim2" type="button">Simulate Zepto order</button><button class="btn ghost" id="qcOut" type="button">Stockout check · Milk ×30</button></div>
+          <div id="qcInvArea" style="margin-top:12px"></div>
+        </div>
+        </div>
+        <div style="margin-top:18px">
+          <div class="card">
+            <div class="card-h"><span class="ic" data-i="clock"></span><div><h3>Near-expiry alerts</h3><p>Dairy, snacks, beverages — with smart markdowns</p></div></div>
+            <div class="fields"><label class="field">Expiring within<select id="exDays"><option value="7">7 days</option><option value="15">15 days</option><option value="30" selected>30 days</option><option value="60">60 days</option><option value="90">90 days</option></select></label>
+              <button class="btn ghost" id="exGo" type="button">Refresh</button><button class="btn" id="rmGo" type="button">📲 WhatsApp re-order manifests</button></div>
+            <p id="exSum" class="muted" style="margin:10px 0 6px"></p>
+            <div class="table-wrap"><table id="exTbl"><thead><tr><th>Item</th><th>Qty</th><th>Expiry</th><th>Status</th><th>Sell at</th><th>At risk</th></tr></thead><tbody></tbody></table></div>
+            <details style="margin-top:12px"><summary style="cursor:pointer;font-weight:700;font-size:13.5px">+ Add stock item</summary>
+              <form id="addInv" class="fields" style="margin-top:10px">
+                <label class="field">Name<input name="name" required></label><label class="field">Brand<input name="brand"></label>
+                <label class="field">Category<select name="category"><option>dairy</option><option>snacks</option><option>beverages</option><option>bakery</option></select></label>
+                <label class="field">Qty<input name="qty" type="number" min="0" required></label><label class="field">MRP ₹<input name="mrp" type="number" step="any"></label>
+                <label class="field">Cost ₹<input name="cost" type="number" step="any"></label><label class="field">Expiry<input name="expiry_date" type="date" required></label>
+                <label class="field">Distributor<select name="distributor_id"><option value="1">Dairy</option><option value="2">Snacks</option><option value="3">Beverages</option><option value="4">General</option></select></label>
+                <button class="btn">Add</button></form></details>
+          </div>
+        </div>
+        <div id="rmArea" class="grid2" style="margin-top:18px"></div>
+        <div class="card" style="margin-top:18px">
+          <div class="card-h"><span class="ic" data-i="mic"></span><div><h3>Incoming orders</h3><p>Hear it, say yes/no in your language — nothing is applied until you tap confirm</p></div></div>
+          <div id="qcOrders" class="stack"><div class="empty">No orders yet.</div></div>
+        </div>
+        <div class="card" style="margin-top:18px">
+          <div class="card-h"><span class="ic" data-i="trend"></span><div><h3>Kirana growth &amp; spoilage reduction</h3><p><span class="demo-note">Demo data</span></p></div></div>
+          <div class="grid3" id="kpi-kirana"><div class="empty">Sign in to load analytics…</div></div>
+        </div>
+      </section>
+    </main>
+  </div>
+</div>
+
+<!-- bottom tab bar (mobile) -->
+<nav class="tabbar" id="tabbar" aria-label="Portals">
+  <button class="pbtn on" data-portal="farmer"><span class="ic" data-i="leaf"></span>Farmer</button>
+  <button class="pbtn" data-portal="driver"><span class="ic" data-i="truck"></span>Driver</button>
+  <button class="pbtn" data-portal="wholesaler"><span class="ic" data-i="building"></span>Wholesale</button>
+  <button class="pbtn" data-portal="kirana"><span class="ic" data-i="store"></span>Kirana</button>
+</nav>
+
+<!-- ============================ HUMAN-IN-THE-LOOP REVIEW MODAL ============================ -->
+<div class="overlay" id="reviewModal"><div class="sheet">
+  <div class="card-h"><span class="ic" data-i="check"></span><div><h3 id="rvTitle">Review bill</h3><p>Check what the system heard. Edit any name, quantity or price — <b>nothing is saved until you confirm</b>.</p></div></div>
+  <div id="rvWarn"></div>
+  <div class="fields" id="rvMeta"></div>
+  <div class="fields" style="margin-top:10px" id="rvPartyWrap"><label class="field">Party / customer<input id="rvParty"></label></div>
+  <div class="table-wrap" style="margin-top:12px"><table id="rvTbl"><thead></thead><tbody></tbody></table></div>
+  <div class="row" style="margin-top:12px;justify-content:space-between"><button class="btn sm" id="rvAdd" type="button">＋ Add item manually</button><b id="rvTot"></b></div>
+  <p id="rvErr" class="err" role="alert"></p>
+  <div class="row"><button class="btn" id="rvOk" type="button">✔ Confirm &amp; save</button><button class="btn ghost" id="rvCancel" type="button">Cancel</button></div>
+</div></div>
+
+<!-- ======================================= RECEIPT ======================================= -->
+<div class="overlay" id="rcptModal"><div class="sheet" style="max-width:640px"><div id="rcpt" class="receipt"></div>
+  <div class="row" style="margin-top:16px"><button class="btn" type="button" onclick="window.print()">🖨 Print</button><a class="btn ghost" id="rcptWa" target="_blank" rel="noopener">Share on WhatsApp</a><button class="btn ghost" id="rcptClose" type="button">Close</button></div>
+</div></div>
+
+<!-- =============================== FLOATING DELIVERY ASSISTANT =============================== -->
+<button id="fab" type="button" title="Delivery translation assistant" aria-label="Open delivery translation assistant" data-i="globe"></button>
+<div id="assistant" role="dialog" aria-label="Delivery translation assistant">
+  <div class="row" style="justify-content:space-between"><b style="font-size:16px">🌐 Delivery translator</b><button class="btn ghost sm" type="button" data-close-assistant aria-label="Close">✕</button></div>
+  <label class="field" style="margin-top:10px">Other person speaks
+    <select id="peerLang" class="input"><option value="hi">हिन्दी</option><option value="kn">ಕನ್ನಡ</option><option value="ta">தமிழ்</option><option value="te">తెలుగు</option><option value="mr">मराठी</option><option value="en">English</option></select></label>
+  <button class="btn block" id="asPaste" type="button" style="margin-top:10px">📋 Auto-Paste &amp; Translate</button>
+  <textarea class="input" id="asText" placeholder="…or paste / type their message here" style="min-height:56px;margin-top:8px"></textarea>
+  <button class="btn ghost block" id="asTr" type="button" style="margin-top:8px">Translate to my language</button>
+  <div class="out" id="asOut">—</div>
+  <b style="font-size:12.5px;color:var(--muted)">QUICK REPLIES · tap = copy in their language</b>
+  <div class="chips" id="asChips" style="margin:8px 0 12px"></div>
+  <div class="divider"></div>
+  <b style="font-size:12.5px;color:var(--muted)">🎧 HANDS-FREE EARBUD MODE</b>
+  <div class="fields" style="margin-top:8px"><label class="field">Direction<select id="ebDir" class="input"><option value="in">Their speech ➔ my earbuds</option><option value="out">My speech ➔ their language (card)</option></select></label>
+    <button class="btn" id="ebBtn" type="button" style="flex:0 0 auto">Start</button></div>
+  <div id="meter" style="margin-top:10px"><i></i></div>
+  <div class="muted" id="ebState" style="margin-top:6px">Idle. Browsers can't capture cellular-call audio — use speakerphone, in-person talk or a VoIP call.</div>
+  <div class="divider"></div>
+  <button class="btn block" id="cardBtn" type="button">🔠 Show last translation as giant driver card</button>
+</div>
+<div id="card" role="dialog" aria-label="Driver visual card"><div class="big" id="cardBig"></div><div class="small">(tap anywhere to close)</div></div>
+<div id="toasts" aria-live="polite"></div>
+
+<script>
+"use strict";
+/* =====================================================================================
+   CORE UTILITIES
+   ===================================================================================== */
+const $=(s,r=document)=>r.querySelector(s), $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const inr=n=>'₹'+Number(n||0).toLocaleString('en-IN',{maximumFractionDigits:2});
+const LANGS={en:'en-IN',hi:'hi-IN',kn:'kn-IN',ta:'ta-IN',te:'te-IN',mr:'mr-IN'};
+const store={get(k,d){try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}},set(k,v){try{localStorage.setItem(k,v)}catch(e){}},del(k){try{localStorage.removeItem(k)}catch(e){}}};
+const S={lang:store.get('ip_lang','en'),charts:{},lastTr:null,analytics:null,cmp:['wholesaler','fmcg']};
+const ICON={
+  pulse:'<path d="M3 12h3l2-7 4 14 3-9 2 2h4"/>',leaf:'<path d="M11 20A7 7 0 0 1 4 13c0-5 4-9 16-9 0 12-4 16-9 16Z"/><path d="M4 21c3-6 6-9 11-11"/>',
+  truck:'<path d="M1 6h13v11H1z"/><path d="M14 10h4l4 4v3h-8z"/><circle cx="6" cy="18" r="2"/><circle cx="18" cy="18" r="2"/>',
+  building:'<path d="M4 21V5l8-3 8 3v16"/><path d="M9 21v-5h6v5M9 9h.01M15 9h.01M9 13h.01M15 13h.01"/>',
+  store:'<path d="M3 9l1.5-5h15L21 9"/><path d="M3 9a3 3 0 0 0 6 0 3 3 0 0 0 6 0 3 3 0 0 0 6 0"/><path d="M5 12v9h14v-9"/>',
+  mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/>',globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/>',
+  trend:'<path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/>',route:'<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M8 19h7a3 3 0 0 0 0-6H9a3 3 0 0 1 0-6h7"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',bolt:'<path d="M13 2 4 14h7l-1 8 9-12h-7z"/>',check:'<path d="M20 6 9 17l-5-5"/>',doc:'<path d="M14 3H6v18h12V7z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>'
+};
+function svg(name,size=20){return `<svg width="${size}" height="${size}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICON[name]||''}</svg>`}
+function paintIcons(root=document){$$('[data-i]',root).forEach(el=>{if(!el.dataset.done){el.innerHTML=svg(el.dataset.i,el.classList.contains('logo')?22:(el.id==='fab'?26:20));el.dataset.done=1}})}
+function toast(msg,kind=''){const t=document.createElement('div');t.className='toast '+kind;t.textContent=msg;$('#toasts').appendChild(t);setTimeout(()=>t.remove(),3800)}
+function authHeader(){const t=store.get('ip_token','');return t?{Authorization:'Bearer '+t}:{}}
+async function API(url,body){
+  const init={headers:{...authHeader()}};
+  if(body!==undefined){init.method='POST';init.headers['Content-Type']='application/json';init.body=JSON.stringify(body)}
+  let r;try{r=await fetch(url,init)}catch(e){throw new Error('Cannot reach the server — is server.py running?')}
+  const d=await r.json().catch(()=>({}));
+  if(r.status===401&&!url.startsWith('/api/auth/'))Auth.expire();
+  if(!r.ok){const e=new Error(d.error||r.statusText);e.data=d;e.status=r.status;throw e}
+  return d;
+}
+const fmtKpi=(v,u)=>u==='pct'?(+v).toFixed(1).replace(/\.0$/,'')+'%':u==='days'?(+v)+' days':inr(v);
+
+/* =====================================================================================
+   PORTALS (role themes)
+   ===================================================================================== */
+const Portal={
+  cur:'farmer',
+  init(){
+    $$('.pbtn[data-portal]').forEach(b=>b.addEventListener('click',()=>this.go(b.dataset.portal)));
+    $$('[data-open-assistant]').forEach(b=>b.addEventListener('click',()=>Assistant.toggle(true)));
+    const saved=store.get('ip_portal','farmer');this.go(['farmer','driver','wholesaler','kirana'].includes(saved)?saved:'farmer',true);
+  },
+  go(name,silent){
+    if(Auth.signedIn&&Auth.role&&name!==Auth.role)name=Auth.role;   // a login can only open its own portal
+    this.cur=name;document.body.dataset.theme=name;store.set('ip_portal',name);
+    $$('.pane').forEach(p=>p.classList.toggle('hidden',p.id!=='pane-'+name));
+    $$('.pbtn[data-portal]').forEach(b=>b.classList.toggle('on',b.dataset.portal===name));
+    const meta=document.querySelector('meta[name=theme-color]');if(meta)meta.content={farmer:'#10b981',driver:'#2563eb',wholesaler:'#2d3fa8',kirana:'#f59e0b'}[name];
+    window.scrollTo({top:0,behavior:silent?'auto':'smooth'});
+    if(!Auth.signedIn)return;
+    if(name==='driver')Driver.load();
+    if(name==='wholesaler')requestAnimationFrame(()=>Analytics.drawCharts());
+    if(name==='kirana'){Fmcg.load();QC.orders()}
+  }
+};
+
+/* =====================================================================================
+   AUTH — mobile OTP gate
+   ===================================================================================== */
+const ROLE_META={
+  farmer:{title:'Farmer',sub:'Sell produce · book trucks · track savings',icon:'leaf',color:'#059669'},
+  driver:{title:'Driver / Transporter',sub:'Log trips · find loads · earnings',icon:'truck',color:'#2563eb'},
+  wholesaler:{title:'Wholesaler / FMCG',sub:'B2B billing · logistics · ROI',icon:'building',color:'#2d3fa8'},
+  kirana:{title:'Kirana / Retailer',sub:'Billing · expiry · quick-commerce',icon:'store',color:'#d97706'}
+};
+const Auth={
+  signedIn:false,phone:'',role:null,
+  init(){
+    $('#roleGrid').innerHTML=Object.entries(ROLE_META).map(([k,m])=>`<button type="button" class="rolecard" data-role="${k}" style="--rc:${m.color}"><span class="ic">${svg(m.icon,24)}</span><b>${m.title}</b><small>${m.sub}</small></button>`).join('');
+    $('#roleGrid').addEventListener('click',e=>{const b=e.target.closest('.rolecard');if(b)this.pickRole(b.dataset.role)});
+    $('#changeRoleBtn').onclick=()=>this.step(0);
+    $('#sendOtpBtn').onclick=()=>this.sendOtp();
+    $('#resendBtn').onclick=()=>this.sendOtp();
+    $('#verifyOtpBtn').onclick=()=>this.verify();
+    $('#changeNumBtn').onclick=()=>this.step(1);
+    $('#authPhone').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,10)});
+    $('#authPhone').addEventListener('keydown',e=>{if(e.key==='Enter')this.sendOtp()});
+    $('#authOtp').addEventListener('input',e=>{e.target.value=e.target.value.replace(/\D/g,'').slice(0,4);if(e.target.value.length===4)this.verify()});
+    $('#logoutBtn').onclick=async()=>{try{await API('/api/auth/logout',{})}catch(e){}this.expire(true)};
+    this.step(0);
+    return this.resume();
+  },
+  step(n){
+    [0,1,2].forEach(i=>$('#authStep'+i).classList.toggle('hidden',i!==n));
+    $('#authErr').textContent='';
+    $('#authSub').textContent=n===0?'Choose how you use IndiePulse. Each role has its own login and workspace.':`Sign in as ${ROLE_META[this.role]?.title||''} with your mobile number.`;
+    if(n===1)setTimeout(()=>$('#authPhone').focus(),50);if(n===2)setTimeout(()=>$('#authOtp').focus(),50);
+  },
+  pickRole(r){
+    this.role=r;document.body.dataset.theme=r;               // preview the role's colours behind the dialog
+    $('#rolePicked').textContent=ROLE_META[r].title;this.step(1);
+  },
+  async resume(){
+    if(!store.get('ip_token',''))return;
+    try{const me=await API('/api/auth/me');this.done(me.phone,me.role)}catch(e){store.del('ip_token')}
+  },
+  async sendOtp(){
+    const phone=$('#authPhone').value.trim(),err=$('#authErr');err.textContent='';
+    if(!this.role){this.step(0);return}
+    if(!/^[6-9]\d{9}$/.test(phone)){err.textContent='Enter a valid 10-digit Indian mobile number';return}
+    const b=$('#sendOtpBtn');b.disabled=true;
+    try{const d=await API('/api/auth/send-otp',{phone});
+      $('#authHint').textContent=d.hint||'OTP sent to +91 '+phone;this.step(2);$('#authOtp').value=''}
+    catch(e){err.textContent=e.message}
+    b.disabled=false;
+  },
+  async verify(){
+    const phone=$('#authPhone').value.trim(),otp=$('#authOtp').value.trim(),err=$('#authErr');err.textContent='';
+    if(otp.length!==4){err.textContent='Enter the 4-digit OTP';return}
+    const b=$('#verifyOtpBtn');b.disabled=true;
+    try{const d=await API('/api/auth/verify-otp',{phone,otp,role:this.role});store.set('ip_token',d.token);this.done(d.phone,d.role)}
+    catch(e){err.textContent=e.message;$('#authOtp').select()}
+    b.disabled=false;
+  },
+  done(phone,role){
+    this.signedIn=true;this.phone=phone;this.role=role;
+    $('#authModal').classList.remove('on');
+    $('#userBadge').textContent=`📱 +91 ${phone} · ${ROLE_META[role].title}`;$('#userChip').classList.remove('hidden');
+    document.body.classList.add('single');                    // this login sees only its own workspace
+    $$('.pbtn[data-portal]').forEach(b=>b.classList.toggle('locked',b.dataset.portal!==role));
+    safe(()=>App.onLogin(),'onLogin');
+  },
+  expire(manual){
+    store.del('ip_token');this.signedIn=false;this.role=null;$('#userChip').classList.add('hidden');
+    document.body.classList.remove('single');$$('.pbtn[data-portal]').forEach(b=>b.classList.remove('locked'));
+    $('#authPhone').value='';this.step(0);
+    $('#authErr').textContent=manual?'':'Session expired — please sign in again';
+    $('#authModal').classList.add('on');
+  }
+};
+
+/* =====================================================================================
+   VOICE — Gnani Vachana (server-proxied) with Web Speech API fallback
+   Both engines expose:  Voice.listen(lang,{onInterim,onFinal,onEnd,onError,onStatus}) -> {stop()}
+   ===================================================================================== */
+const Settings={
+  engine:store.get('ip_engine','auto'),
+  init(){
+    $('#uiLang').value=S.lang;
+    $('#uiLang').onchange=e=>{S.lang=e.target.value;store.set('ip_lang',S.lang);Assistant.loadChips()};
+    $('#engineSel').value=this.engine;
+    $('#engineSel').onchange=e=>{this.engine=e.target.value;store.set('ip_engine',this.engine);Voice.paintEngine()};
+  }
+};
+function encodeWav(float32,inRate,outRate=16000){
+  let data=float32;
+  if(inRate!==outRate){const ratio=inRate/outRate,n=Math.floor(float32.length/ratio);data=new Float32Array(n);
+    for(let i=0;i<n;i++){const p=i*ratio,i0=Math.floor(p),i1=Math.min(i0+1,float32.length-1);data[i]=float32[i0]+(float32[i1]-float32[i0])*(p-i0)}}
+  const buf=new ArrayBuffer(44+data.length*2),v=new DataView(buf),w=(o,s)=>{for(let i=0;i<s.length;i++)v.setUint8(o+i,s.charCodeAt(i))};
+  w(0,'RIFF');v.setUint32(4,36+data.length*2,true);w(8,'WAVEfmt ');v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
+  v.setUint32(24,outRate,true);v.setUint32(28,outRate*2,true);v.setUint16(32,2,true);v.setUint16(34,16,true);w(36,'data');v.setUint32(40,data.length*2,true);
+  for(let i=0;i<data.length;i++){const s=Math.max(-1,Math.min(1,data[i]));v.setInt16(44+i*2,s<0?s*0x8000:s*0x7fff,true)}
+  return buf;
+}
+/* Browsers expose the microphone (getUserMedia / SpeechRecognition) and clipboard only on HTTPS or localhost. */
+function micProblem(){
+  if(!window.isSecureContext)return `The microphone is blocked because this page is open over plain http (${location.host}). Open http://localhost:${location.port||5000} on this computer, or start the server with HTTPS=1 and use https://${location.host}`;
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)return 'This browser does not allow microphone access. Try the latest Chrome or Edge.';
+  return null;
+}
+const Voice={
+  gnaniReady:false,gnaniOff:false,
+  async init(){
+    try{const d=await API('/api/gnani/status');this.gnaniReady=!!d.stt_configured}catch(e){this.gnaniReady=false}
+    this.paintEngine();
+  },
+  useGnani(){const m=Settings.engine;return !this.gnaniOff&&this.gnaniReady&&(m==='auto'||m==='gnani')},
+  paintEngine(){
+    const g=this.useGnani(),b=$('#engineBadge');
+    b.classList.toggle('live',g);
+    const label=g?'Gnani Vachana':(Settings.engine==='gnani'&&!this.gnaniReady?'Gnani key missing · browser':'Browser speech');
+    $('#engineTxt').textContent=label;$('#engineSide').textContent=label;
+  },
+  listen(lang,cb){return this.useGnani()?this.gnaniListen(lang,cb):this.browserListen(lang,cb)},
+  browserListen(lang,cb){
+    const ctl={stop(){try{r&&r.stop()}catch(e){}}};let r=null;
+    const mp=micProblem();if(mp){setTimeout(()=>{cb.onError&&cb.onError(new Error(mp));cb.onEnd&&cb.onEnd()},0);return ctl}
+    const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+    if(!SR){cb.onError&&cb.onError(new Error('Speech recognition isn\'t supported in this browser — please type, or use Chrome/Edge.'));cb.onEnd&&cb.onEnd();return ctl}
+    r=new SR();r.lang=LANGS[lang]||'en-IN';r.interimResults=true;r.continuous=false;
+    r.onresult=e=>{let i='',f='';for(let k=e.resultIndex;k<e.results.length;k++){const t=e.results[k][0].transcript;if(e.results[k].isFinal)f+=t;else i+=t}
+      if(i&&cb.onInterim)cb.onInterim(i);if(f&&cb.onFinal)cb.onFinal(f)};
+    r.onerror=e=>{if(e.error!=='no-speech'&&e.error!=='aborted')cb.onError&&cb.onError(new Error(e.error==='not-allowed'?'Microphone permission denied':e.error))};
+    r.onend=()=>cb.onEnd&&cb.onEnd();
+    try{r.start()}catch(e){cb.onError&&cb.onError(e);cb.onEnd&&cb.onEnd()}
+    return ctl;
+  },
+  gnaniListen(lang,cb){
+    const ctl={stopNow:false,finish:null,stop(){this.stopNow=true;this.finish&&this.finish()}};
+    (async()=>{
+      let stream,ctx;
+      try{
+        const mp=micProblem();if(mp)throw new Error(mp);
+        stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,channelCount:1}});
+        const AC=window.AudioContext||window.webkitAudioContext;ctx=new AC();
+        const src=ctx.createMediaStreamSource(stream),proc=ctx.createScriptProcessor(4096,1,1),chunks=[];
+        let heard=false,silentMs=0,done=false;const t0=performance.now(),rate=ctx.sampleRate;
+        const finish=async()=>{
+          if(done)return;done=true;
+          try{proc.disconnect();src.disconnect()}catch(e){}stream.getTracks().forEach(t=>t.stop());ctx.close().catch(()=>{});
+          if(!heard){cb.onError&&cb.onError(new Error('Didn\'t hear anything — tap the mic and try again'));cb.onEnd&&cb.onEnd();return}
+          cb.onStatus&&cb.onStatus('Transcribing with Gnani…');
+          let total=0;chunks.forEach(c=>total+=c.length);const all=new Float32Array(total);let o=0;chunks.forEach(c=>{all.set(c,o);o+=c.length});
+          const fd=new FormData();fd.append('audio',new Blob([encodeWav(all,rate)],{type:'audio/wav'}),'speech.wav');fd.append('language_code',LANGS[lang]||'en-IN');
+          try{
+            const r=await fetch('/api/gnani/stt',{method:'POST',headers:authHeader(),body:fd});const d=await r.json().catch(()=>({}));
+            if(r.status===401)Auth.expire();
+            if(!r.ok){if(d.fallback){Voice.gnaniOff=true;Voice.paintEngine();toast('Gnani key not set on the server — using browser speech','bad')}throw new Error(d.error||'Transcription failed')}
+            if(d.transcript)cb.onFinal&&cb.onFinal(d.transcript);else cb.onError&&cb.onError(new Error('No speech recognised — try again'));
+          }catch(e){cb.onError&&cb.onError(e)}
+          cb.onEnd&&cb.onEnd();
+        };
+        ctl.finish=finish;
+        proc.onaudioprocess=e=>{
+          const d=e.inputBuffer.getChannelData(0);chunks.push(new Float32Array(d));
+          let sum=0;for(let i=0;i<d.length;i+=8)sum+=d[i]*d[i];const rms=Math.sqrt(sum/(d.length/8));
+          if(rms>0.015){heard=true;silentMs=0}else if(heard){silentMs+=d.length/rate*1000;if(silentMs>1600)finish()}
+          if(performance.now()-t0>28000)finish();           // Vachana REST limit is 30 s per clip
+        };
+        src.connect(proc);proc.connect(ctx.destination);   // output buffer is never written => silent, no feedback
+        cb.onStatus&&cb.onStatus('Listening… tap the mic again when you\'re done');
+        if(ctl.stopNow)finish();
+      }catch(e){
+        if(stream)stream.getTracks().forEach(t=>t.stop());
+        cb.onError&&cb.onError(new Error(e.name==='NotAllowedError'?'Microphone permission denied':e.message||'Microphone unavailable'));cb.onEnd&&cb.onEnd();
+      }
+    })();
+    return ctl;
+  },
+  speak(text,lang,onEnd){
+    if(!('speechSynthesis' in window)){onEnd&&onEnd();return}
+    const u=new SpeechSynthesisUtterance(text);u.lang=LANGS[lang]||'en-IN';u.onend=u.onerror=()=>onEnd&&onEnd();
+    speechSynthesis.cancel();speechSynthesis.speak(u);
+  }
+};
+
+/* =====================================================================================
+   BILLING PANELS  (one component, four roles)  +  HUMAN-IN-THE-LOOP REVIEW
+   ===================================================================================== */
+const BILL_CFG={
+  farmer:{type:'farmer_invoice',role:'farmer',roles:'farmer',icon:'leaf',title:'Farm-produce invoice',sub:'Voice → official receipt with mandi benchmark',btn:'Parse & review',
+    ph:'e.g. Farmer Ramu sold to buyer Krishna, 2 quintal tomato at 2400 and 50 kg onion at 28',ex:'Farmer Ramu sold to buyer Krishna, 2 quintal tomato at 2400 and 50 kg onion at 28'},
+  driver:{type:'transport_waybill',role:'transporter',roles:'transporter',icon:'truck',title:'Trip waybill',sub:'Driver, vehicle, load and fare — by voice',btn:'Parse waybill',
+    ph:'e.g. Driver Ramesh, vehicle KA 05 MN 2201, from Kolar to Bengaluru, load 1200 kg, fare 3500 rupees',ex:'Driver Ramesh, vehicle KA 05 MN 2201, from Kolar to Bengaluru, load 1200 kg, fare 3500 rupees'},
+  wholesaler:{type:'b2b_invoice',role:'wholesaler',roles:'wholesaler,fmcg',icon:'doc',title:'B2B tax invoice',sub:'Bulk staples & packaged goods with automatic GST',btn:'Parse B2B bill',seller:true,
+    ph:'e.g. Buyer Sri Traders, 10 packet biscuits at 8, 20 packet chips at 17 and 5 litre oil at 130',ex:'Buyer Sri Traders, 10 packet biscuits at 8, 20 packet chips at 17 and 5 litre oil at 130'},
+  kirana:{type:'kirana_bill',role:'kirana',roles:'kirana',icon:'store',title:'Retail bill',sub:'Customer order → itemised receipt, logged to SQLite',btn:'Parse retail bill',
+    ph:'e.g. 2 kg onion, 1 kg sugar, 3 packet chips',ex:'2 kg onion, 1 kg sugar, 3 packet chips'}
+};
+const BillPanel={
+  all:[],
+  mount(key){
+    const c=BILL_CFG[key],el=$('#bill-'+key);if(!el)return;
+    el.innerHTML=`<div class="card"><div class="card-h"><span class="ic">${svg(c.icon)}</span><div><h3>${c.title}</h3><p>${c.sub}</p></div></div>
+      <div class="row" style="align-items:center"><button class="mic" type="button" data-mic aria-label="Dictate">${svg('mic',26)}</button>
+        <div style="flex:1;min-width:150px"><div class="muted" data-state>Tap the mic and speak in your language — or type below.</div>
+        ${c.seller?'<label class="field" style="margin-top:6px;max-width:220px">Selling as<select data-seller class="input"><option value="wholesaler">Wholesaler</option><option value="fmcg">FMCG distributor</option></select></label>':''}</div></div>
+      <textarea class="input" data-txt style="margin-top:12px" placeholder="${esc(c.ph)}"></textarea>
+      <div class="row" style="margin-top:10px"><button class="btn" type="button" data-parse>${c.btn} →</button><span class="err" data-err role="alert"></span></div>
+      <div class="example" style="margin-top:8px">Not sure what to say? <button type="button" data-ex>Use an example</button></div>
+      <div class="divider"></div><div class="muted" style="font-weight:700;margin-bottom:8px">Recent bills</div><div data-recent class="muted">—</div></div>`;
+    const p={key,c,el,txt:$('[data-txt]',el),state:$('[data-state]',el),err:$('[data-err]',el),mic:$('[data-mic]',el),rec:null};
+    p.mic.onclick=()=>this.toggleMic(p);
+    $('[data-parse]',el).onclick=()=>this.parse(p);
+    $('[data-ex]',el).onclick=()=>{p.txt.value=c.ex;p.txt.focus()};
+    this.all.push(p);
+  },
+  toggleMic(p){
+    if(p.rec){p.rec.stop();return}
+    p.err.textContent='';p.mic.classList.add('rec');p.state.textContent='Starting microphone…';
+    p.rec=Voice.listen(S.lang,{
+      onInterim:t=>p.txt.value=t,onFinal:t=>p.txt.value=t,onStatus:t=>p.state.textContent=t,
+      onEnd:()=>{p.rec=null;p.mic.classList.remove('rec');p.state.textContent=p.txt.value?'Done — review the text, then parse.':'Tap the mic and speak in your language — or type below.'},
+      onError:e=>{p.err.textContent=e.message}
+    });
+  },
+  async parse(p){
+    p.err.textContent='';
+    if(!p.txt.value.trim()){p.err.textContent='Say or type something first';return}
+    const role=p.c.seller?$('[data-seller]',p.el).value:p.c.role;
+    try{const d=await API('/api/agent/parse-bill',{bill_type:p.c.type,transcript:p.txt.value,language:S.lang,role});Review.open(d,p)}
+    catch(e){p.err.textContent=e.message}
+  },
+  async refresh(p){
+    try{const d=await API('/api/bills?limit=5&role='+p.c.roles);
+      $('[data-recent]',p.el).innerHTML=d.bills.length?`<div class="table-wrap"><table><thead><tr><th>No.</th><th>Party</th><th>Total</th><th>When</th></tr></thead><tbody>${d.bills.map(b=>`<tr><td>${esc(b.bill_no)}</td><td>${esc(b.party||'—')}</td><td>${inr(b.total)}</td><td class="muted">${esc(b.created_at.slice(5,16).replace('T',' '))}</td></tr>`).join('')}</tbody></table></div>`:'No bills yet — your first one will show up here.'}catch(e){}
+  },
+  refreshAll(){this.all.filter(p=>p.key===Auth.role).forEach(p=>this.refresh(p))}
+};
+const META={
+  farmer_invoice:[['seller','Farmer name'],['mandi','Mandi / market']],
+  transport_waybill:[['driver_name','Driver name'],['vehicle_no','Vehicle no.'],['origin','From'],['destination','To'],['load_kg','Load (kg)','number']],
+  b2b_invoice:[['buyer_gstin','Buyer GSTIN (optional)'],['interstate','Inter-state (IGST)','checkbox']],
+  kirana_bill:[['customer_phone','Customer phone']]
+};
+const Review={
+  d:null,panel:null,
+  init(){
+    $('#rvAdd').onclick=()=>{this.addRow({name:'',qty:1,unit:'kg',rate:0,gst_rate:''});this.totals()};
+    $('#rvCancel').onclick=()=>$('#reviewModal').classList.remove('on');
+    $('#rvOk').onclick=()=>this.confirm();
+    $('#rvTbl').addEventListener('input',()=>this.totals());
+    $('#rvTbl').addEventListener('click',e=>{const x=e.target.closest('.x');if(x){x.closest('tr').remove();this.totals()}});
+  },
+  open(d,panel){
+    this.d=d;this.panel=panel;const bt=d.bill_type;
+    $('#rvTitle').textContent='Review: '+d.title;
+    $('#rvWarn').innerHTML=(d.warnings||[]).map(w=>`<div class="warnbox">⚠ ${esc(w)}</div>`).join('');
+    $('#rvMeta').innerHTML=META[bt].map(([k,l,t])=>{const v=d.meta[k];
+      return t==='checkbox'?`<label class="field" style="flex-direction:row;align-items:center;gap:8px;flex:0 0 auto"><input type="checkbox" style="width:auto" data-m="${k}" ${v?'checked':''}>${l}</label>`
+        :`<label class="field">${l}<input data-m="${k}" type="${t||'text'}" value="${esc(v??'')}"></label>`}).join('');
+    $('#rvParty').value=d.party||'';$('#rvPartyWrap').style.display=bt==='transport_waybill'?'none':'';
+    const gst=bt==='b2b_invoice',bm=bt==='farmer_invoice';
+    $('#rvTbl thead').innerHTML=`<tr><th>Item</th><th>Qty</th><th>Unit</th><th>Rate ₹</th>${gst?'<th>GST %</th>':''}${bm?'<th>Mandi ref</th>':''}<th>Amount</th><th></th></tr>`;
+    $('#rvTbl tbody').innerHTML='';d.items.forEach(i=>this.addRow(i));
+    if(!d.items.length){this.addRow({name:'',qty:1,unit:'kg',rate:0,gst_rate:''});setTimeout(()=>{const f=$('#rvTbl tbody input');f&&f.focus()},80)}   // nothing recognised: start with an empty row to type into
+    $('#rvErr').textContent='';this.totals();$('#reviewModal').classList.add('on');
+  },
+  addRow(i){
+    const bt=this.d.bill_type,gst=bt==='b2b_invoice',bm=bt==='farmer_invoice',tr=document.createElement('tr');tr.dataset.key=i.item_key||'';
+    tr.innerHTML=`<td><input data-k="name" value="${esc(i.name)}" aria-label="Item"></td><td><input data-k="qty" type="number" step="any" min="0" value="${i.qty}" style="width:84px" aria-label="Quantity"></td>
+      <td><input data-k="unit" value="${esc(i.unit)}" style="width:80px" aria-label="Unit"></td><td><input data-k="rate" type="number" step="any" min="0" value="${i.rate}" style="width:96px" aria-label="Rate"></td>
+      ${gst?`<td><input data-k="gst_rate" type="number" step="any" min="0" value="${i.gst_rate??''}" style="width:72px" aria-label="GST percent"></td>`:''}
+      ${bm?`<td class="muted">${i.benchmark_rate?inr(i.benchmark_rate)+' ('+(i.variance_pct>0?'+':'')+i.variance_pct+'%)':'—'}</td>`:''}
+      <td class="amt"><b>—</b></td><td><button class="btn danger sm x" type="button" aria-label="Remove row">✕</button></td>`;
+    $('#rvTbl tbody').appendChild(tr);
+  },
+  items(){return $$('#rvTbl tbody tr').map(tr=>{const o={item_key:tr.dataset.key||null};$$('[data-k]',tr).forEach(i=>o[i.dataset.k]=i.type==='number'?(i.value===''?null:parseFloat(i.value)):i.value);return o})},
+  totals(){
+    let sub=0,tax=0;const gstOn=this.d.bill_type==='b2b_invoice';
+    $$('#rvTbl tbody tr').forEach(tr=>{const g=k=>parseFloat($(`[data-k=${k}]`,tr)?.value)||0;const a=g('qty')*g('rate');sub+=a;if(gstOn)tax+=a*g('gst_rate')/100;$('.amt',tr).innerHTML='<b>'+inr(a)+'</b>'});
+    $('#rvTot').textContent=gstOn?`Subtotal ${inr(sub)} + GST ${inr(tax)} = ${inr(sub+tax)}`:`Total ${inr(sub)}`;
+  },
+  async confirm(){
+    const meta={};$$('#rvMeta [data-m]').forEach(i=>meta[i.dataset.m]=i.type==='checkbox'?i.checked:i.value);
+    const items=this.items().map(i=>{if(i.gst_rate===null||i.gst_rate===undefined)delete i.gst_rate;return i});
+    const b=$('#rvOk');b.disabled=true;
+    try{
+      const r=await API('/api/agent/confirm-bill',{bill_type:this.d.bill_type,role:this.d.role,party:$('#rvParty').value,meta,items,language:this.d.language,transcript:this.d.transcript});
+      $('#reviewModal').classList.remove('on');if(this.panel)this.panel.txt.value='';
+      Receipt.show(r.bill);BillPanel.refreshAll();if(Portal.cur==='driver')Driver.load();toast('Saved '+r.bill.bill_no,'good');
+    }catch(e){$('#rvErr').textContent=e.message}
+    b.disabled=false;
+  }
+};
+const Receipt={
+  init(){$('#rcptClose').onclick=()=>$('#rcptModal').classList.remove('on')},
+  show(b){
+    const bm=b.bill_type==='farmer_invoice',gst=b.bill_type==='b2b_invoice',t=b.totals;
+    const metaLines=Object.entries(b.meta).filter(([k,v])=>v!==''&&v!==false).map(([k,v])=>`${esc(k.replace(/_/g,' '))}: ${esc(v===true?'yes':v)}`).join('<br>');
+    $('#rcpt').innerHTML=`<h2 style="margin:0;font-size:22px">${esc(b.title)}</h2><div class="muted" style="margin:4px 0 10px">No: <b>${esc(b.bill_no)}</b> · ${esc(b.created_at.replace('T',' '))}</div>
+      ${b.party?`<div>Party: <b>${esc(b.party)}</b></div>`:''}<div class="muted" style="margin-bottom:8px">${metaLines}</div>
+      <div class="table-wrap"><table><thead><tr><th>Item</th><th>Qty</th><th>Rate</th>${bm?'<th>Mandi ref</th>':''}${gst?'<th>GST</th>':''}<th>Amount</th></tr></thead><tbody>
+      ${b.items.map(i=>`<tr><td>${esc(i.name)}</td><td>${i.qty} ${esc(i.unit)}</td><td>${inr(i.rate)}</td>${bm?`<td>${i.benchmark_rate?inr(i.benchmark_rate)+' ('+(i.variance_pct>0?'+':'')+i.variance_pct+'%)':'—'}</td>`:''}${gst?`<td>${i.gst_rate}%</td>`:''}<td>${inr(i.amount)}</td></tr>`).join('')}</tbody></table></div>
+      <div style="text-align:right;margin-top:10px">Subtotal ${inr(t.subtotal)}<br>${gst?(t.igst?`IGST ${inr(t.igst)}<br>`:`CGST ${inr(t.cgst)} · SGST ${inr(t.sgst)}<br>`):''}<b style="font-size:20px">Total ${inr(t.total)}</b></div>`;
+    const txt=`${b.title} ${b.bill_no}\n${b.party?'Party: '+b.party+'\n':''}`+b.items.map(i=>`${i.name} ${i.qty}${i.unit} x ${i.rate} = ${i.amount}`).join('\n')+`\nTotal: Rs ${t.total}\n(IndiePulse)`;
+    $('#rcptWa').href='https://wa.me/?text='+encodeURIComponent(txt);$('#rcptModal').classList.add('on');
+  }
+};
+
+/* =====================================================================================
+   LOGISTICS MATCHER — city dropdowns populate instantly from a built-in list, then refresh from the API
+   ===================================================================================== */
+const Logistics={
+  cities:['Bengaluru','Chennai','Chikkaballapur','Davangere','Hosur','Hubballi','Hyderabad','Kolar','Mandya','Mysuru','Pune','Tumakuru'],
+  mounts:[],
+  mount(elId,cfg){
+    const el=$('#'+elId);if(!el)return;
+    const multi=cfg.lanes.length>1;
+    el.innerHTML=`<div class="card-h"><span class="ic">${svg('truck')}</span><div><h3>${esc(cfg.title)}</h3><p>Nearest vehicles with driver contact, fare estimate and one-tap WhatsApp dispatch</p></div></div>
+      <div class="fields">${multi?`<label class="field" style="flex:2 1 220px">Lane<select data-lane>${cfg.lanes.map(l=>`<option value="${l[0]}">${l[1]}</option>`).join('')}</select></label>`:`<input type="hidden" data-lane value="${cfg.lanes[0][0]}">`}
+        <label class="field">From<select data-from></select></label><label class="field">To<select data-to></select></label>
+        <label class="field">Load (kg)<input data-kg type="number" min="1" value="${cfg.kg||800}"></label><label class="field">Goods<input data-goods value="${esc(cfg.goods||'')}"></label>
+        <label class="field hidden" data-distwrap>City distance (km)<input data-dist type="number" min="1" max="100" value="15"></label>
+        <button class="btn" type="button" data-go style="flex:0 0 auto">Find vehicles</button></div>
+      <p class="muted" data-info style="margin:10px 0 0"></p><div class="stack" data-res style="margin-top:12px"></div>`;
+    const m={el,cfg,from:$('[data-from]',el),to:$('[data-to]',el)};
+    this.fill(m,true);
+    const toggle=()=>$('[data-distwrap]',el).classList.toggle('hidden',m.from.value!==m.to.value);
+    m.from.onchange=m.to.onchange=toggle;toggle();
+    $('[data-go]',el).onclick=()=>this.find(m);
+    this.mounts.push(m);
+  },
+  fill(m,first){
+    const opts=this.cities.map(c=>`<option>${esc(c)}</option>`).join('');
+    const pf=first?m.cfg.from:m.from.value,pt=first?m.cfg.to:m.to.value;
+    m.from.innerHTML=opts;m.to.innerHTML=opts;
+    if(this.cities.includes(pf))m.from.value=pf;if(this.cities.includes(pt))m.to.value=pt;
+  },
+  async loadCities(){                                   // public endpoint → works before sign-in; retries on failure
+    for(let i=0;i<3;i++){
+      try{const r=await fetch('/api/logistics/cities',{cache:'no-store'});if(!r.ok)throw 0;const d=await r.json();
+        if(Array.isArray(d.cities)&&d.cities.length){this.cities=d.cities;this.mounts.forEach(m=>this.fill(m,false));return}}
+      catch(e){await new Promise(r=>setTimeout(r,400*(i+1)))}
+    }
+  },
+  async find(m){
+    const el=m.el,info=$('[data-info]',el),res=$('[data-res]',el),lane=$('[data-lane]',el).value;
+    const q=new URLSearchParams({lane,origin:m.from.value,destination:m.to.value,weight_kg:$('[data-kg]',el).value,goods:$('[data-goods]',el).value});
+    if(m.from.value===m.to.value)q.set('distance_km',$('[data-dist]',el).value||15);
+    info.textContent='Finding vehicles…';
+    try{
+      const d=await API('/api/logistics/match?'+q);
+      info.textContent=`${d.origin} ➔ ${d.destination} · ~${d.distance_km} km · ${d.weight_kg} kg · ${d.matches.length} vehicle(s). ${d.note}`;
+      res.innerHTML=d.matches.map(v=>`<div class="vcard"><div class="row" style="justify-content:space-between"><b style="font-size:16px">${esc(v.name)}</b><span class="badge" style="background:#f59e0b">★ ${v.rating}</span></div>
+        <div>${esc(v.vehicle_type)} · <span class="plate">${esc(v.plate)}</span></div>
+        <div class="stat-row"><span>Capacity <b>${v.capacity_kg} kg</b></span><span>Pickup <b>${v.pickup_km} km</b> away</span><span>Speaks <b>${v.languages.join(', ')}</b></span></div>
+        <div class="stat-row"><span>Trip <b>${v.trip_km} km</b></span><span>Fare <b>${inr(v.fare)}</b></span><span>Driver wage ≈ <b>${inr(v.driver_wage)}</b></span></div>
+        <div class="row"><a class="btn sm" href="${esc(v.tel)}">📞 ${esc(v.phone)}</a><a class="btn ghost sm" target="_blank" rel="noopener" href="${esc(v.whatsapp)}" data-d="${v.id}" data-fare="${v.fare}">WhatsApp dispatch</a></div></div>`).join('')||'<div class="empty">No vehicle matches this lane and weight.</div>';
+      $$('a[data-d]',res).forEach(a=>a.addEventListener('click',()=>API('/api/logistics/dispatch',{driver_id:+a.dataset.d,lane:d.lane,origin:d.origin,destination:d.destination,weight_kg:d.weight_kg,fare:+a.dataset.fare}).catch(()=>{})));
+    }catch(e){info.innerHTML=`<span class="err">${esc(e.message)}</span>`;res.innerHTML=''}
+  }
+};
+
+/* =====================================================================================
+   ANALYTICS — role KPIs + Chart.js (bar: before/after · line: idle capital & spoilage)
+   ===================================================================================== */
+const COL={farmer:'#10b981',driver:'#2563eb',wholesaler:'#2d3fa8',fmcg:'#7c3aed',kirana:'#f59e0b'};
+function kpiCard(k){
+  let delta;
+  if(k.unit==='pct')delta=`▲ +${k.improvement} pts`;
+  else if(k.unit==='days')delta=`▼ ${Math.abs(k.improvement)} days ${k.lower_better?'fewer':'more'}`;
+  else delta=(k.lower_better?'▼ Saved ':'▲ +')+inr(Math.abs(k.improvement))+(k.improvement_pct!=null?` (${Math.abs(k.improvement_pct)}%)`:'');
+  const mx=Math.max(Math.abs(k.before),Math.abs(k.after),1);
+  return `<div class="kpi"><div class="lbl">${esc(k.label)}</div><div class="big">${fmtKpi(k.after,k.unit)}</div><span class="delta">${delta}</span>
+    <div class="ba"><div><em>Before</em><i style="width:${Math.max(Math.abs(k.before)/mx*100,2)}%"></i><span>${fmtKpi(k.before,k.unit)}</span></div><div class="af"><em>After</em><i style="width:${Math.max(Math.abs(k.after)/mx*100,2)}%"></i><span>${fmtKpi(k.after,k.unit)}</span></div></div></div>`;
+}
+const Analytics={
+  async loadAll(){
+    try{
+      const d=await API('/api/agent/wealth-analytics?roles=farmer,driver,wholesaler,fmcg,kirana');S.analytics=d;const R=d.roles;
+      const find=(role,key)=>(R[role]?.kpis||[]).find(k=>k.key===key);
+      if(R.farmer){$('#kpi-farmer').innerHTML=R.farmer.kpis.map(kpiCard).join('');
+        const ms=find('farmer','middleman_savings');$('#heroFarmerSave').textContent=ms?inr(ms.improvement):'—';$('#heroFarmerEarn').textContent=inr(find('farmer','gross_profit')?.after)}
+      if(R.driver)$('#kpi-driver').innerHTML=R.driver.kpis.map(kpiCard).join('');
+      $('#kpi-wholesaler').innerHTML=['wholesaler','fmcg'].filter(r=>R[r]).map(r=>`<h4 style="margin:14px 0 10px;color:${COL[r]};font-size:15px">${esc(R[r].label)}</h4><div class="grid3">${R[r].kpis.map(kpiCard).join('')}</div>`).join('');
+      if(R.wholesaler){$('#heroWsProfit').textContent=inr(find('wholesaler','gross_profit')?.after);$('#heroWsCap').textContent=inr(find('wholesaler','capital_unlocked')?.improvement)}
+      if(R.kirana){$('#kpi-kirana').innerHTML=R.kirana.kpis.map(kpiCard).join('');const g=find('kirana','regional_growth');$('#heroKiranaGrowth').textContent=g?'+'+g.after+'%':'—'}
+      this.buildChips();if(Portal.cur==='wholesaler')this.drawCharts();
+    }catch(e){if(e.status!==401)toast(e.message,'bad')}
+  },
+  buildChips(){
+    const R=S.analytics?.roles||{};
+    $('#cmpChips').innerHTML=Object.keys(R).filter(r=>r!=='driver').map(r=>`<button type="button" class="chip ${S.cmp.includes(r)?'':'plain'}" data-r="${r}" aria-pressed="${S.cmp.includes(r)}">${esc(R[r].label)}</button>`).join('');
+    $$('#cmpChips .chip').forEach(b=>b.onclick=()=>{const r=b.dataset.r,i=S.cmp.indexOf(r);if(i>=0){if(S.cmp.length>1)S.cmp.splice(i,1)}else S.cmp.push(r);this.buildChips();this.drawCharts()});
+  },
+  drawCharts(){
+    const d=S.analytics,msg=$('#chartMsg');if(!d)return;
+    if(typeof Chart==='undefined'){msg.textContent='Charts need the Chart.js CDN — check your internet connection and reload.';msg.classList.remove('hidden');return}
+    msg.classList.add('hidden');
+    ['bar','line'].forEach(k=>{if(S.charts[k]){S.charts[k].destroy();S.charts[k]=null}});
+    const R=Object.entries(d.roles).filter(([r])=>S.cmp.includes(r));if(!R.length)return;
+    Chart.defaults.font.family="Inter,system-ui,sans-serif";Chart.defaults.color='#64748b';
+    const grid={color:'rgba(15,23,42,.06)'};
+    S.charts.bar=new Chart($('#barChart'),{type:'bar',data:{labels:d.months,datasets:R.flatMap(([r,v])=>[
+      {label:v.label+' · before',data:v.series.before,backgroundColor:COL[r]+'44',borderRadius:6},
+      {label:v.label+' · after IndiePulse',data:v.series.after,backgroundColor:COL[r],borderRadius:6}])},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${inr(c.parsed.y)}`}}},
+        scales:{y:{grid,title:{display:true,text:'₹ per month'},ticks:{callback:v=>'₹'+(v>=100000?(v/100000)+'L':v>=1000?(v/1000)+'k':v)}},x:{grid:{display:false}}}}});
+    const idx=a=>a.map(x=>+(x/(a[0]||1)*100).toFixed(1));
+    S.charts.line=new Chart($('#lineChart'),{type:'line',data:{labels:d.months,datasets:R.flatMap(([r,v])=>[
+      {label:v.label+' · idle capital',data:idx(v.series.idle_capital),actual:v.series.idle_capital,borderColor:COL[r],backgroundColor:COL[r]+'22',tension:.35,fill:true,pointRadius:3},
+      {label:v.label+' · spoilage',data:idx(v.series.spoilage),actual:v.series.spoilage,borderColor:COL[r],borderDash:[6,4],tension:.35,pointRadius:3}])},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:'bottom',labels:{boxWidth:10,usePointStyle:true}},tooltip:{callbacks:{label:c=>`${c.dataset.label}: ${c.parsed.y} (${inr(c.dataset.actual[c.dataIndex])})`}}},
+        scales:{y:{grid,title:{display:true,text:'Index (first month = 100)'}},x:{grid:{display:false}}}}});
+  }
+};
+
+/* =====================================================================================
+   DRIVER — live trip performance from saved waybills
+   ===================================================================================== */
+const Driver={
+  async load(){
+    try{
+      const {stats:s,recent}=await API('/api/driver/trips');
+      const dlt=(a,b)=>b?`<span class="delta">${a>=b?'▲':'▼'} ${Math.abs(a-b)} vs last period</span>`:'';
+      $('#driverLive').innerHTML=[
+        ['Trips this month',s.trips_month,dlt(s.trips_month,s.trips_prev_month)],['Fares this month',inr(s.fare_month),s.fare_prev_month?`<span class="delta">vs ${inr(s.fare_prev_month)} last month</span>`:''],
+        ['Avg fare / trip',inr(s.avg_fare),''],['Load carried',(s.load_kg_month/1000).toFixed(1)+' t',''],['Trips this week',s.trips_week,dlt(s.trips_week,s.trips_prev_week)]
+      ].map(([l,v,x])=>`<div class="kpi"><div class="lbl">${l}</div><div class="big" style="font-size:22px">${v}</div>${x}</div>`).join('');
+      $('#heroDriverTrips').textContent=s.trips_month;$('#heroDriverFare').textContent=inr(s.fare_month);
+      $('#driverRecent').innerHTML=recent.length?`<div class="muted" style="font-weight:700;margin-bottom:8px">Recent waybills</div><div class="table-wrap"><table><thead><tr><th>No.</th><th>Route</th><th>Vehicle</th><th>Fare</th></tr></thead><tbody>${recent.map(r=>`<tr><td>${esc(r.bill_no)}</td><td>${esc(r.origin||'—')} ➔ ${esc(r.destination||'—')}</td><td>${esc(r.vehicle_no||'—')}</td><td>${inr(r.total)}</td></tr>`).join('')}</tbody></table></div>`:'<div class="empty">No trips yet — dictate your first waybill on the left.</div>';
+    }catch(e){if(e.status!==401)$('#driverLive').innerHTML=`<div class="err">${esc(e.message)}</div>`}
+  }
+};
+
+/* =====================================================================================
+   FMCG EXPIRY + RE-ORDER MANIFESTS
+   ===================================================================================== */
+const Fmcg={
+  init(){
+    $('#exGo').onclick=()=>this.load();$('#rmGo').onclick=()=>this.manifests();$('#exDays').onchange=()=>this.load();
+    $('#addInv').onsubmit=async e=>{e.preventDefault();const f=Object.fromEntries(new FormData(e.target));
+      try{await API('/api/fmcg/inventory',{...f,qty:+f.qty,mrp:+f.mrp,cost:+f.cost,distributor_id:+f.distributor_id,store_name:'Ganesh Kirana'});e.target.reset();toast('Stock item added','good');this.load()}catch(x){toast(x.message,'bad')}};
+  },
+  async load(){
+    try{
+      const d=await API('/api/fmcg/expiry-alerts?days='+$('#exDays').value);
+      $('#exSum').innerHTML=`<b>${d.alerts.length}</b> item(s) need attention · value at risk <b>${inr(d.total_value_at_risk)}</b>`;
+      $('#heroKiranaRisk').textContent=inr(d.total_value_at_risk);
+      $('#exTbl tbody').innerHTML=d.alerts.map(a=>`<tr><td><b>${esc(a.name)}</b><div class="muted">${esc(a.brand)} · ${esc(a.category)} · ${esc(a.batch)}</div></td><td>${a.qty}</td>
+        <td>${esc(a.expiry_date)}<div class="muted">${a.days_left<0?'expired':a.days_left+' day(s) left'}</div></td><td><span class="badge b-${a.severity}">${a.severity}</span></td>
+        <td>${a.days_left<0?'<span class="err">Remove / return</span>':inr(a.sell_price)+' <span class="muted">(−'+a.suggested_discount_pct+'%)</span>'}</td><td>${inr(a.value_at_risk)}</td></tr>`).join('')||'<tr><td colspan="6" class="empty">All clear — nothing expiring in this window 🎉</td></tr>';
+    }catch(e){if(e.status!==401)toast(e.message,'bad')}
+  },
+  async manifests(){
+    try{
+      const days=Math.min(+$('#exDays').value,15);
+      const d=await API('/api/fmcg/reorder-manifest',{expiry_days:days,store:'Ganesh Kirana'});
+      $('#rmArea').innerHTML=d.manifests.map(m=>`<div class="card"><div class="card-h"><span class="ic">${svg('doc')}</span><div><h3>${esc(m.distributor)}</h3><p>Re-order manifest</p></div></div>
+        <textarea class="input" readonly style="min-height:130px">${esc(m.text)}</textarea><a class="btn" style="margin-top:10px" target="_blank" rel="noopener" href="${esc(m.whatsapp)}">Send on WhatsApp</a></div>`).join('')||'<div class="card empty" style="grid-column:1/-1">Nothing to re-order right now.</div>';
+      $('#rmArea').scrollIntoView({behavior:'smooth',block:'nearest'});
+    }catch(e){toast(e.message,'bad')}
+  }
+};
+
+/* =====================================================================================
+   QUICK-COMMERCE — kirana bridge + voice confirm in the shopkeeper's language
+   ===================================================================================== */
+const QC={
+  init(){
+    $('#qcInv').onclick=()=>this.inventory();$('#qcSim1').onclick=()=>this.simulate('Blinkit');$('#qcSim2').onclick=()=>this.simulate('Zepto');
+    $('#qcOut').onclick=()=>this.stockout();$('#qcOrders').addEventListener('click',e=>this.click(e));
+  },
+  async inventory(){
+    try{const d=await API('/api/qc/desk/inventory?pincode='+encodeURIComponent($('#qcPin').value));
+      $('#qcInvArea').innerHTML=d.stores.map(s=>`<details open style="margin-bottom:10px"><summary style="cursor:pointer"><b>${esc(s.name)}</b> <span class="muted">${esc(s.store_id)} · ${esc(s.pincode)} · ${esc(s.lang)}</span></summary>
+        <div class="chips" style="margin:8px 0">${s.stock.map(x=>`<span class="chip ${x.status==='out'?'bad':x.status==='low'?'warn':'plain'}">${esc(x.name)}: ${x.qty}</span>`).join('')}</div></details>`).join('')||'<div class="empty">No kirana stores in this pincode.</div>'}catch(e){toast(e.message,'bad')}
+  },
+  async stockout(){
+    try{const d=await API('/api/qc/stockout-check',{pincode:$('#qcPin').value,shortages:[{sku:'MILK500',qty_needed:30}]});const r=d.results[0];
+      $('#qcInvArea').innerHTML=`<div class="infobox">Dark-store shortage: Milk 500ml ×30 → ${r.fulfillable?'micro-fulfilment hubs: '+r.hubs.map(h=>`<b>${esc(h.name)}</b> (${h.qty} in stock)`).join(', '):'<span class="err">no kirana hub can cover it</span>'}</div>`}catch(e){toast(e.message,'bad')}
+  },
+  async simulate(platform){
+    try{await API('/api/qc/desk/simulate-order',{platform,pincode:$('#qcPin').value});toast(platform+' order received','good');this.orders()}
+    catch(e){toast(e.message+(e.data?.shortages?' — '+e.data.shortages.map(s=>s.sku+' short').join(', '):''),'bad')}
+  },
+  async orders(){
+    try{const d=await API('/api/qc/desk/orders');
+      $('#qcOrders').innerHTML=d.orders.map(o=>`<div class="vcard" data-id="${o.id}" data-lang="${esc(o.store_lang)}">
+        <div class="row" style="justify-content:space-between"><b>${esc(o.platform)} · ${esc(o.order_ref)} · ${esc(o.store_name)}</b><span class="badge b-${o.status}">${o.status}</span></div>
+        <div data-msg style="font-size:20px;font-weight:600;margin:4px 0">${esc(o.message_local)}</div><div class="muted">${esc(o.message_en)}</div>
+        ${o.status==='pending'?`<div class="row"><button class="btn ghost sm" data-a="say">🔊 Read aloud</button><button class="btn ghost sm" data-a="mic">🎤 Reply by voice</button><button class="btn sm" data-a="accept">Accept</button><button class="btn danger sm" data-a="reject">Reject</button></div><div class="muted" data-fb></div>`:''}</div>`).join('')||'<div class="empty">No orders yet — simulate one above.</div>'}catch(e){}
+  },
+  async click(e){
+    const b=e.target.closest('button[data-a]');if(!b)return;
+    const card=b.closest('.vcard'),id=card.dataset.id,lang=card.dataset.lang,fb=$('[data-fb]',card),a=b.dataset.a;
+    try{
+      if(a==='say')Voice.speak($('[data-msg]',card).textContent,lang);
+      else if(a==='mic'){
+        fb.textContent='Starting microphone…';
+        Voice.listen(lang,{onStatus:t=>fb.textContent=t,onFinal:async t=>{
+          try{const r=await API(`/api/qc/desk/orders/${id}/voice-command`,{transcript:t,language:lang});
+            fb.innerHTML=`Heard “${esc(t)}” → <b>${esc(r.intent.toUpperCase())}</b> — ${esc(r.feedback)} `;Voice.speak(r.feedback,lang);
+            if(r.intent!=='unclear'){const c=document.createElement('button');c.className='btn sm';c.textContent='Tap to confirm: '+r.intent;c.onclick=()=>this.decide(id,r.intent);fb.appendChild(c)}
+          }catch(x){fb.textContent=x.message}},onError:x=>fb.textContent=x.message})
+      }else await this.decide(id,a);
+    }catch(x){fb.textContent=x.message}
+  },
+  async decide(id,decision){try{await API(`/api/qc/desk/orders/${id}/decision`,{decision});toast('Order '+decision+'ed','good')}catch(e){toast(e.message,'bad')}this.orders()}
+};
+
+/* =====================================================================================
+   DELIVERY ASSISTANT — clipboard, quick replies, earbud mode (Web Audio), driver card
+   ===================================================================================== */
+const Assistant={
+  eb:null,
+  toggle(on){const a=$('#assistant');a.classList.toggle('on',on===undefined?!a.classList.contains('on'):on);if(a.classList.contains('on'))this.loadChips()},
+  async loadChips(){
+    if(!Auth.signedIn)return;
+    try{const d=await API(`/api/quick-replies?my=${S.lang}&peer=${$('#peerLang').value}`);
+      $('#asChips').innerHTML=d.replies.map(r=>`<button class="chip" type="button" data-t="${esc(r.theirs)}" data-m="${esc(r.mine)}">${esc(r.mine)}</button>`).join('')}catch(e){}
+  },
+  show(text,src,tgt,extra){S.lastTr={text,src,tgt};$('#asOut').innerHTML=esc(text)+(extra?`<div class="muted" style="font-weight:500;font-size:12.5px;margin-top:4px">${esc(extra)}</div>`:'')},
+  async translate(text){
+    try{const d=await API('/api/translate',{text,source:'auto',target:S.lang});
+      if(d.source&&d.source!==S.lang&&$('#peerLang').value!==d.source){$('#peerLang').value=d.source;this.loadChips()}
+      this.show(d.translation,d.source,S.lang,d.translated?'':(d.note||''));return d}
+    catch(e){$('#asOut').innerHTML=`<span class="err">${esc(e.message)}</span>`}
+  },
+  init(){
+    $('#fab').onclick=()=>this.toggle();$$('[data-close-assistant]').forEach(b=>b.onclick=()=>this.toggle(false));
+    $('#peerLang').onchange=()=>this.loadChips();
+    $('#asTr').onclick=()=>$('#asText').value.trim()&&this.translate($('#asText').value);
+    $('#asPaste').onclick=async()=>{
+      try{const t=await navigator.clipboard.readText();if(!t.trim()){$('#asOut').textContent='Clipboard is empty.';return}$('#asText').value=t;this.translate(t)}
+      catch(e){$('#asOut').innerHTML='<span class="err">Clipboard access blocked (needs HTTPS or localhost, plus permission). Paste into the box below instead.</span>'}
+    };
+    $('#asChips').onclick=async e=>{const c=e.target.closest('.chip');if(!c)return;this.show(c.dataset.t,S.lang,$('#peerLang').value,'Copied: '+c.dataset.m);
+      try{await navigator.clipboard.writeText(c.dataset.t)}catch(x){$('#asOut').innerHTML+='<div class="err" style="font-size:12px">Could not copy automatically.</div>'}};
+    $('#cardBtn').onclick=()=>this.card();$('#card').onclick=()=>$('#card').classList.remove('on');
+    $('#ebBtn').onclick=()=>this.eb?this.stopEarbud():this.startEarbud();
+  },
+  card(){if(!S.lastTr){$('#asOut').textContent='Tap a quick reply or translate something first.';return}$('#cardBig').textContent=S.lastTr.text;$('#card').classList.add('on')},
+  async startEarbud(){
+    const st=$('#ebState');
+    try{
+      const mp=micProblem();if(mp)throw new Error(mp);
+      const stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+      const ctx=new (window.AudioContext||window.webkitAudioContext)(),an=ctx.createAnalyser();an.fftSize=256;
+      ctx.createMediaStreamSource(stream).connect(an);                    // analyser only — never routed to speakers => no feedback loop
+      const buf=new Uint8Array(an.frequencyBinCount),meter=$('#meter i');let raf;
+      (function tick(){an.getByteTimeDomainData(buf);let m=0;for(const v of buf)m=Math.max(m,Math.abs(v-128));meter.style.width=Math.min(100,m*1.6)+'%';raf=requestAnimationFrame(tick)})();
+      this.eb={stream,ctx,stopRaf:()=>cancelAnimationFrame(raf),speaking:false,stopped:false,rec:null};
+      $('#ebBtn').textContent='Stop';this.earbudLoop();
+    }catch(e){st.innerHTML=`<span class="err">Microphone unavailable: ${esc(e.message)}</span>`}
+  },
+  earbudLoop(){
+    const eb=this.eb;if(!eb||eb.stopped)return;
+    const dir=$('#ebDir').value,peer=$('#peerLang').value,src=dir==='in'?peer:S.lang,tgt=dir==='in'?S.lang:peer;
+    $('#ebState').textContent=`🎙 Listening (${src} ➔ ${tgt})…`;
+    eb.rec=Voice.listen(src,{
+      onStatus:t=>$('#ebState').textContent='🎙 '+t,
+      onFinal:async t=>{
+        try{const d=await API('/api/translate',{text:t,source:src,target:tgt});
+          this.show(d.translation,src,tgt,'Heard: '+t+(d.translated?'':' — '+(d.note||'')));
+          if(dir==='in'){eb.speaking=true;$('#ebState').textContent='🔊 Speaking to your earbuds…';Voice.speak(d.translation,tgt,()=>{eb.speaking=false})}else this.card();
+        }catch(e){$('#ebState').innerHTML=`<span class="err">${esc(e.message)}</span>`}
+      },
+      onEnd:()=>{const wait=()=>{if(!this.eb||this.eb.stopped)return;if(this.eb.speaking||speechSynthesis.speaking)return setTimeout(wait,250);setTimeout(()=>this.earbudLoop(),350)};wait()},
+      onError:e=>{if(/denied|not-allowed|supported/i.test(e.message)){$('#ebState').innerHTML=`<span class="err">${esc(e.message)}</span>`;this.stopEarbud()}}
+    });
+  },
+  stopEarbud(){
+    const eb=this.eb;if(!eb)return;eb.stopped=true;try{eb.rec&&eb.rec.stop()}catch(e){}
+    eb.stopRaf();eb.stream.getTracks().forEach(t=>t.stop());eb.ctx.close().catch(()=>{});speechSynthesis.cancel();this.eb=null;
+    $('#ebBtn').textContent='Start';$('#meter i').style.width='0';$('#ebState').textContent='Stopped.';
+  }
+};
+
+/* =====================================================================================
+   BOOT — every module initialises independently, so one failure can never block the rest
+   ===================================================================================== */
+function safe(fn,name){try{const r=fn();if(r&&r.catch)r.catch(e=>console.error('[IndiePulse]',name,e))}catch(e){console.error('[IndiePulse]',name,e)}}
+const App={
+  onLogin(){
+    safe(()=>Voice.init(),'voice');safe(()=>Analytics.loadAll(),'analytics');safe(()=>BillPanel.refreshAll(),'bills');
+    safe(()=>Assistant.loadChips(),'chips');safe(()=>Portal.go(Auth.role,true),'portal');
+  }
+};
+function boot(){
+  safe(()=>paintIcons(),'icons');
+  safe(()=>Settings.init(),'settings');
+  Object.keys(BILL_CFG).forEach(k=>safe(()=>BillPanel.mount(k),'bill-'+k));
+  safe(()=>paintIcons(),'icons2');
+  safe(()=>{Logistics.mount('lg-farmer',{title:'Truck matcher for farmers',lanes:[['farmer-wholesaler','Farmer ➔ Wholesaler']],from:'Kolar',to:'Bengaluru',goods:'Tomato',kg:800});
+            Logistics.mount('lg-wholesaler',{title:'Universal logistics desk',lanes:[['fmcg-wholesaler','FMCG brand ➔ Wholesaler'],['wholesaler-kirana','Wholesaler ➔ Kirana']],from:'Bengaluru',to:'Bengaluru',goods:'Packaged goods',kg:1500})},'logistics-mount');
+  safe(()=>Logistics.loadCities(),'logistics-cities');
+  safe(()=>Review.init(),'review');safe(()=>Receipt.init(),'receipt');safe(()=>Fmcg.init(),'fmcg');safe(()=>QC.init(),'qc');safe(()=>Assistant.init(),'assistant');
+  safe(()=>Portal.init(),'portal');
+  safe(()=>Auth.init(),'auth');
+  safe(()=>{if(!window.isSecureContext){$('#secureHost').textContent=location.host;$('#secureBanner').classList.remove('hidden');$('#secureClose').onclick=()=>$('#secureBanner').classList.add('hidden')}},'secure-banner');
+}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot);else boot();
+</script>
+</body>
+</html>

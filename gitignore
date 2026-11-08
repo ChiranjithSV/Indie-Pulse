@@ -1,0 +1,5 @@
+.env
+*.db
+__pycache__/
+*.pyc
+server_v1_backup.py
